@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -36,7 +36,7 @@ impl<T> Default for LinkedList<T> {
 }
 
 impl<T> LinkedList<T> {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             length: 0,
             start: None,
@@ -44,9 +44,9 @@ impl<T> LinkedList<T> {
         }
     }
 
-    pub fn add(&mut self, obj: T) {
+    fn add(&mut self, obj: T) {
         let mut node = Box::new(Node::new(obj));
-        node.next = None;
+        //node.next = None;
         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
         match self.end {
             None => self.start = node_ptr,
@@ -56,7 +56,7 @@ impl<T> LinkedList<T> {
         self.length += 1;
     }
 
-    pub fn get(&mut self, index: i32) -> Option<&T> {
+    fn get(&mut self, index: i32) -> Option<&T> {
         self.get_ith_node(self.start, index)
     }
 
@@ -69,14 +69,39 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+    where T: PartialOrd + Ord + Clone
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
+		// Self {
+        //     length: 0,
+        //     start: None,
+        //     end: None,
+        // }
+        let mut dummy = Self::new();
+        unsafe {
+            let mut t1 = list_a.start;
+            let mut t2 = list_b.start;
+            
+            while t1 != None && t2 != None {
+                if t1.unwrap().as_ref().val < t2.unwrap().as_ref().val {
+                    dummy.add(t1.unwrap().as_ref().val.clone());
+                    t1 = t1.unwrap().as_ref().next;
+                } else {
+                    dummy.add(t2.unwrap().as_ref().val.clone());
+                    t2 = t2.unwrap().as_ref().next;
+                }
+            }
+            while t1 != None {
+                dummy.add(t1.unwrap().as_ref().val.clone());
+                t1 = t1.unwrap().as_ref().next;
+            }
+            while t2 != None {
+                dummy.add(t2.unwrap().as_ref().val.clone());
+                t2 = t2.unwrap().as_ref().next;
+            }
+        };
+        dummy
 	}
 }
 

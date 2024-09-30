@@ -2,7 +2,7 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -36,8 +36,56 @@ where
         self.len() == 0
     }
 
+    pub fn update(&mut self) {
+        if self.count == 0 || ! self.children_present(1){
+            return (); // 只有没有节点 或 没有孩子节点， 不需要更新
+        }
+        
+        let mut idx = 1;
+        while self.children_present(idx) {
+            // 有孩子节点
+            let idx_left = self.left_child_idx(idx);
+            let idx_right = self.right_child_idx(idx);
+
+            if idx_right > self.count {
+                if idx_left <= self.count && ! (self.comparator)(&self.items[idx], &self.items[idx_left]) {
+                    self.items.swap(idx, idx_left); // 交换节点
+                    idx = idx_left; // 更新下标
+                    continue; // 再次检查
+                }
+                break;
+            } else {
+                // 左右孩子都存在，跟较小的比较
+                if (self.comparator)(&self.items[idx_left], &self.items[idx_right]) {
+                    if (self.comparator)(&self.items[idx_left], &self.items[idx]) {
+                        self.items.swap(idx, idx_left); // 交换节点
+                        idx = idx_left; // 更新下标
+                        continue; // 再次检查
+                    }
+                } else {
+                    if (self.comparator)(&self.items[idx_right], &self.items[idx]) {
+                        self.items.swap(idx, idx_right); // 交换节点
+                        idx = idx_right; // 更新下标
+                        continue; // 再次检查
+                    }
+                }
+                break;
+            }
+        }
+    }
+
     pub fn add(&mut self, value: T) {
         //TODO
+        self.items.push(value);
+        self.count += 1;
+
+        let mut idx: usize = self.count;
+        let mut idx_parent = self.parent_idx(idx);
+        while idx_parent > 0 && (self.comparator)(&self.items[idx], &self.items[idx_parent]) {
+            self.items.swap(idx, idx_parent);
+            idx = idx_parent;
+            idx_parent = self.parent_idx(idx);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -45,6 +93,7 @@ where
     }
 
     fn children_present(&self, idx: usize) -> bool {
+        // 有孩子节点
         self.left_child_idx(idx) <= self.count
     }
 
@@ -58,7 +107,11 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+		let mut idx: usize = 1;
+        while self.children_present(idx) {
+            idx = self.left_child_idx(idx);
+        }
+        idx
     }
 }
 
@@ -85,7 +138,15 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.is_empty() {
+            None
+        } else {
+            self.items.swap(1, self.count);
+            let ans = self.items.pop();
+            self.count -= 1;
+            self.update();
+            ans
+        }
     }
 }
 
